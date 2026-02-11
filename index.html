@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dental Assistant Pro - デモ版</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans JP',sans-serif;background:#f8fafc;color:#1e293b;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.app{max-width:430px;margin:0 auto;min-height:100vh;position:relative}
+/* Header */
+.header{position:sticky;top:0;z-index:40;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid #e2e8f0;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:8px}
+.header-left span.logo{font-size:20px}
+.header-left span.name{font-weight:700;font-size:13px;color:#1e293b}
+.header-right{display:flex;align-items:center;gap:8px}
+.header-avatar{font-size:18px}
+.header-user{text-align:right}
+.header-user .uname{font-size:11px;font-weight:600;color:#334155}
+.header-user .urole{font-size:9px;color:#94a3b8}
+/* Bottom Nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border-top:1px solid #e2e8f0;display:flex;z-index:40;padding:4px 0 env(safe-area-inset-bottom,8px)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:6px 0;cursor:pointer;transition:all 0.15s;border-radius:8px;margin:0 2px}
+.nav-item:active{transform:scale(0.95)}
+.nav-item .icon{font-size:18px;line-height:1}
+.nav-item .label{font-size:9px;margin-top:2px;color:#94a3b8;font-weight:500}
+.nav-item.active .label{color:#0284c7;font-weight:700}
+.nav-item.active{background:rgba(2,132,199,0.06)}
+/* Main */
+.main{padding:16px 16px 96px}
+/* Cards */
+.card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:12px;margin-bottom:8px}
+.card:active{transform:scale(0.995)}
+.card-title{font-size:13px;font-weight:700;color:#1e293b}
+.card-sub{font-size:11px;color:#94a3b8;margin-top:2px}
+.card-body{font-size:12px;color:#475569;margin-top:6px;line-height:1.6}
+/* Badges */
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:600}
+.badge-sky{background:#e0f2fe;color:#0369a1}
+.badge-red{background:#fee2e2;color:#dc2626}
+.badge-amber{background:#fef3c7;color:#d97706}
+.badge-green{background:#dcfce7;color:#16a34a}
+.badge-purple{background:#f3e8ff;color:#7c3aed}
+.badge-pink{background:#fce7f3;color:#db2777}
+.badge-slate{background:#f1f5f9;color:#64748b}
+/* Buttons */
+.btn{padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all 0.15s}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:#0284c7;color:#fff}
+.btn-primary:hover{background:#0369a1}
+.btn-outline{background:#fff;color:#475569;border:1px solid #e2e8f0}
+.btn-danger{background:#fee2e2;color:#dc2626}
+.btn-sm{padding:5px 10px;font-size:10px}
+/* Stats Grid */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat-card{border-radius:12px;padding:10px;text-align:center;border:1px solid}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .lbl{font-size:9px;margin-top:2px}
+/* Search */
+.search{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #e2e8f0;font-size:13px;background:#fff;outline:none}
+.search:focus{border-color:#7dd3fc;box-shadow:0 0 0 3px rgba(125,211,252,0.3)}
+/* Filter Pills */
+.pills{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:8px 0}
+.pill{padding:6px 12px;border-radius:99px;font-size:11px;white-space:nowrap;cursor:pointer;border:1px solid #e2e8f0;background:#fff;color:#475569;font-weight:500}
+.pill.active{background:#0284c7;color:#fff;border-color:#0284c7;font-weight:700}
+/* Tags */
+.tag{display:inline-block;font-size:9px;background:#f1f5f9;color:#94a3b8;padding:2px 6px;border-radius:99px;margin:1px}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:12px}
+/* Form */
+.form-group{margin-bottom:10px}
+.form-label{font-size:10px;color:#64748b;margin-bottom:4px;display:block;font-weight:500}
+.form-input{width:100%;padding:8px 12px;border-radius:10px;border:1px solid #e2e8f0;font-size:13px;font-family:inherit;outline:none}
+.form-input:focus{border-color:#7dd3fc;box-shadow:0 0 0 3px rgba(125,211,252,0.3)}
+textarea.form-input{resize:none}
+select.form-input{appearance:auto}
+/* Toast */
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;font-size:13px;font-weight:500;padding:10px 20px;border-radius:12px;z-index:80;box-shadow:0 8px 24px rgba(0,0,0,0.2);animation:toastIn 0.3s}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+/* Priority */
+.priority-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px}
+.priority-high{background:#ef4444}
+.priority-normal{background:#3b82f6}
+.priority-low{background:#94a3b8}
+/* Thank You Card */
+.ty-card{background:linear-gradient(135deg,#fef3c7,#fce7f3);border-radius:16px;padding:14px;border:1px solid #fde68a;margin-bottom:8px}
+.ty-emoji{font-size:28px}
+.ty-msg{font-size:12px;color:#475569;margin-top:6px;line-height:1.6}
+.ty-from{font-size:10px;color:#94a3b8;margin-top:6px}
+/* Calendar */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-header{text-align:center;font-size:10px;font-weight:600;color:#64748b;padding:4px}
+.cal-day{text-align:center;padding:6px 2px;border-radius:8px;font-size:11px;cursor:pointer;min-height:36px}
+.cal-day:hover{background:#f1f5f9}
+.cal-day.today{background:#e0f2fe;font-weight:700;color:#0284c7}
+.cal-day.has-shift{background:#dcfce7;border:1px solid #bbf7d0}
+.cal-day.short{background:#fef3c7;border:1px solid #fde68a}
+.cal-day.empty{color:#cbd5e1}
+/* Progress */
+.progress-bar{height:6px;background:#e2e8f0;border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width 0.3s}
+/* Shift Timeline */
+.shift-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9}
+.shift-name{width:60px;font-size:11px;font-weight:600;color:#334155;flex-shrink:0}
+.shift-bar-wrap{flex:1;height:20px;background:#f1f5f9;border-radius:4px;position:relative;overflow:hidden}
+.shift-bar{position:absolute;top:2px;bottom:2px;border-radius:3px;font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600}
+/* Demo banner */
+.demo-banner{background:linear-gradient(135deg,#0284c7,#7c3aed);color:#fff;padding:10px 16px;text-align:center;font-size:11px;font-weight:600;letter-spacing:0.5px}
+.demo-badge{display:inline-block;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:99px;font-size:9px;margin-left:6px}
+/* Tabs inside sections */
+.sub-tabs{display:flex;gap:4px;margin-bottom:10px}
+.sub-tab{flex:1;padding:7px;text-align:center;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;background:#f1f5f9;color:#64748b}
+.sub-tab.active{background:#0284c7;color:#fff}
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{background:#f8fafc;padding:6px 8px;text-align:left;font-weight:600;color:#64748b;border-bottom:1px solid #e2e8f0}
+.tbl td{padding:6px 8px;border-bottom:1px solid #f1f5f9}
+/* Ranking */
+.rank-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9}
+.rank-medal{font-size:20px;width:30px;text-align:center}
+.rank-name{font-size:12px;font-weight:600;flex:1}
+.rank-count{font-size:12px;font-weight:700;color:#0284c7}
+/* Inventory */
+.inv-item{display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:6px}
+.inv-icon{font-size:24px}
+.inv-info{flex:1}
+.inv-name{font-size:12px;font-weight:600}
+.inv-meta{font-size:10px;color:#94a3b8;margin-top:2px}
+.inv-stock{text-align:right}
+.inv-num{font-size:16px;font-weight:700}
+.inv-unit{font-size:9px;color:#94a3b8}
+/* Block content */
+.block-img{width:100%;border-radius:10px;border:1px solid #e2e8f0;margin:8px 0}
+.block-video{width:100%;border-radius:10px;border:1px solid #e2e8f0;margin:8px 0}
+.block-text{font-size:12px;color:#475569;line-height:1.7;margin:4px 0}
+/* Print */
+@media print{.bottom-nav,.demo-banner,.header{display:none}.main{padding:0}}
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+// ============================================================
+// DENTAL ASSISTANT PRO - DEMO VERSION
+// サンプル歯科クリニック
+// ============================================================
+
+// --- Mock Data ---
+var STAFF = [
+  { id: "s1", name: "山田 太郎", avatar: "👨‍⚕️", role: "admin", job: "歯科医師", joined: "2020-04-01" },
+  { id: "s2", name: "佐藤 花子", avatar: "👩‍⚕️", role: "staff", job: "歯科衛生士", joined: "2021-06-15" },
+  { id: "s3", name: "鈴木 一郎", avatar: "🧑‍⚕️", role: "staff", job: "歯科技工士", joined: "2022-01-10" },
+  { id: "s4", name: "田中 美咲", avatar: "👩", role: "staff", job: "受付", joined: "2023-03-01" },
+  { id: "s5", name: "高橋 健太", avatar: "👨‍⚕️", role: "staff", job: "歯科医師", joined: "2021-09-01" },
+  { id: "s6", name: "伊藤 さくら", avatar: "👩‍⚕️", role: "staff", job: "歯科衛生士", joined: "2023-08-01" }
+];
+
+var currentUser = STAFF[0]; // 管理者でログイン
+
+var ANNOUNCEMENTS = [
+  { id: "a1", title: "年末年始の診療スケジュールについて", body: "12/28(土)〜1/5(日)まで休診とします。12/27(金)は午前診療のみです。急患対応は当番医をご確認ください。", author: "s1", priority: "high", is_pinned: true, category: "お知らせ", created_at: "2026-02-10T09:00:00", reactions: { "👍": ["s2","s3"], "✅": ["s4","s5","s6"] }, reads: ["s1","s2","s3","s4","s5"] },
+  { id: "a2", title: "新しい滅菌器の使用方法", body: "2F滅菌室に新型オートクレーブ（クラスB）を導入しました。従来機と操作が異なります。マニュアルタブに手順書を掲載しましたので必ず確認してください。", author: "s1", priority: "normal", is_pinned: false, category: "業務連絡", created_at: "2026-02-09T14:30:00", reactions: { "👍": ["s2","s6"] }, reads: ["s1","s2","s3"] },
+  { id: "a3", title: "患者様アンケート結果の共有", body: "1月分の患者満足度アンケート結果をまとめました。総合満足度は4.2/5.0で前月比+0.3です。「待ち時間」の項目が改善しています。詳細は院内ミーティングで共有します。", author: "s2", priority: "low", is_pinned: false, category: "お知らせ", created_at: "2026-02-08T11:00:00", reactions: { "👍": ["s1","s5"] }, reads: ["s1","s2"] },
+  { id: "a4", title: "【緊急】水道工事による断水のお知らせ", body: "2/15(土)午前中、ビル全体の水道工事のため断水となります。午前の予約は前日までに患者様へご連絡をお願いします。ペットボトルの水を準備しておきます。", author: "s1", priority: "high", is_pinned: true, category: "緊急", created_at: "2026-02-11T08:00:00", reactions: { "🚨": ["s2","s3","s4","s5","s6"] }, reads: ["s1","s2","s3","s4","s5","s6"] }
+];
+
+var MEETINGS = [
+  { id: "m1", title: "2月定例ミーティング", date: "2026-02-14", time: "18:00", location: "休憩室", agenda: [
+    { text: "先月の売上報告", tag: "報告", done: false },
+    { text: "新人研修スケジュール確認", tag: "共有", done: false },
+    { text: "患者クレーム対応の振り返り", tag: "議論", done: false },
+    { text: "3月のシフト希望提出期限", tag: "決定", done: false }
+  ], attendees: ["s1","s2","s3","s4","s5","s6"], author: "s1" },
+  { id: "m2", title: "衛生士カンファレンス", date: "2026-02-20", time: "12:30", location: "診療室2", agenda: [
+    { text: "SRP症例検討", tag: "報告", done: false },
+    { text: "新しいスケーラーの評価", tag: "議論", done: false }
+  ], attendees: ["s2","s5","s6"], author: "s2" }
+];
+
+var HIYARIHATTO = [
+  { id: "h1", title: "患者取り違えそうになった", body: "同姓の患者が同じ時間帯に予約されており、カルテを取り違えそうになった。名前のフルネーム確認と生年月日の照合で気づいた。", category: "確認不足", severity: "中", status: "対策済", created_at: "2026-02-05", anonymous: false, author: "s4" },
+  { id: "h2", title: "薬液の濃度ミス", body: "消毒液の希釈濃度を間違えて調合しかけた。ダブルチェック体制がなかったことが原因。", category: "手順ミス", severity: "高", status: "対策中", created_at: "2026-02-08", anonymous: true, author: null }
+];
+
+var INVENTORY = [
+  { id: "i1", name: "グローブ（M）", category: "消耗品", stock: 45, min_stock: 50, unit: "箱", price: 980, supplier: "デンタルサプライ東京", barcode: "4901234567890", last_used: "2026-02-10" },
+  { id: "i2", name: "グローブ（S）", category: "消耗品", stock: 32, min_stock: 30, unit: "箱", price: 980, supplier: "デンタルサプライ東京", barcode: "4901234567891", last_used: "2026-02-10" },
+  { id: "i3", name: "コンポジットレジン A2", category: "材料", stock: 8, min_stock: 5, unit: "本", price: 3200, supplier: "歯材ネット", barcode: "4902345678901", last_used: "2026-02-09" },
+  { id: "i4", name: "印象材（アルジネート）", category: "材料", stock: 3, min_stock: 5, unit: "袋", price: 2400, supplier: "歯材ネット", barcode: "4902345678902", last_used: "2026-02-07" },
+  { id: "i5", name: "フッ素バーニッシュ", category: "予防", stock: 12, min_stock: 10, unit: "本", price: 4500, supplier: "メディカルプラス", barcode: "4903456789012", last_used: "2026-02-08" },
+  { id: "i6", name: "根管充填材", category: "材料", stock: 2, min_stock: 3, unit: "箱", price: 8900, supplier: "歯材ネット", barcode: "4903456789013", last_used: "2026-02-06" },
+  { id: "i7", name: "麻酔カートリッジ", category: "薬品", stock: 18, min_stock: 20, unit: "箱", price: 5600, supplier: "メディカルプラス", barcode: "4904567890123", last_used: "2026-02-11" },
+  { id: "i8", name: "エプロン", category: "消耗品", stock: 60, min_stock: 30, unit: "枚", price: 120, supplier: "デンタルサプライ東京", barcode: "4904567890124", last_used: "2026-02-11" },
+  { id: "i9", name: "バキュームチップ", category: "消耗品", stock: 5, min_stock: 10, unit: "袋", price: 1800, supplier: "デンタルサプライ東京", barcode: "4905678901234", last_used: "2026-02-10" },
+  { id: "i10", name: "ボンディング材", category: "材料", stock: 6, min_stock: 3, unit: "本", price: 6700, supplier: "歯材ネット", barcode: "4905678901235", last_used: "2026-02-09" }
+];
+
+var SUPPLIERS = [
+  { name: "デンタルサプライ東京", tel: "03-1234-5678", email: "order@dental-supply.example.com", fax: "03-1234-5679" },
+  { name: "歯材ネット", tel: "06-9876-5432", email: "info@shizai-net.example.com", fax: "06-9876-5433" },
+  { name: "メディカルプラス", tel: "045-111-2222", email: "sales@medical-plus.example.com", fax: "045-111-2223" }
+];
+
+var MANUALS = [
+  { id: "mn1", title: "受付業務マニュアル", icon: "📋", category: "業務手順", tags: ["受付","基本"], job_level: "受付",
+    blocks: [
+      { type: "text", value: "## 受付の基本業務フロー\n\n来院された患者様への対応手順です。笑顔で丁寧な対応を心がけましょう。" },
+      { type: "image", value: "https://placehold.co/400x200/e0f2fe/0284c7?text=受付カウンター写真", name: "受付カウンター.jpg" },
+      { type: "text", value: "### 1. 患者様の確認\n- 診察券または保険証を受け取る\n- 予約時間を確認\n- 初診の場合は問診票を記入していただく\n\n### 2. カルテの準備\n- 電子カルテを開く\n- 前回の治療内容を確認\n- ドクターへ申し送り" },
+      { type: "video", value: "https://placehold.co/400x225/f3e8ff/7c3aed?text=受付対応動画", name: "受付対応例.mp4" },
+      { type: "text", value: "### 3. 会計処理\n- 治療費の計算\n- 領収書の発行\n- 次回予約の確認" }
+    ], updated_at: "2026-02-01" },
+  { id: "mn2", title: "滅菌器（クラスB）操作手順", icon: "🔬", category: "機器操作", tags: ["滅菌","衛生"], job_level: "all",
+    blocks: [
+      { type: "text", value: "## クラスBオートクレーブ操作手順\n\n新型滅菌器の操作方法です。必ず手順を守ってください。" },
+      { type: "image", value: "https://placehold.co/400x200/dcfce7/16a34a?text=滅菌器パネル写真", name: "滅菌器.jpg" },
+      { type: "text", value: "### 手順\n1. 電源ON（背面スイッチ）\n2. 器具をトレーに並べる（重ねない）\n3. 扉をしっかり閉める\n4. プログラム「134℃-18分」を選択\n5. STARTボタンを押す\n6. 完了音が鳴るまで開けない" },
+      { type: "image", value: "https://placehold.co/400x200/fef3c7/d97706?text=器具配置の正しい例", name: "配置例.jpg" },
+      { type: "text", value: "⚠️ 注意事項\n- プラスチック器具は121℃プログラムを使用\n- 異常音がしたら即停止→山田先生に報告" }
+    ], updated_at: "2026-02-09" },
+  { id: "mn3", title: "急患対応フロー", icon: "🚨", category: "緊急対応", tags: ["急患","緊急"], job_level: "all",
+    blocks: [
+      { type: "text", value: "## 急患対応の判断基準と手順\n\n急患の連絡があった場合の対応フローです。" },
+      { type: "text", value: "### 緊急度の判断\n- 🔴 最優先：出血が止まらない、強い痛み、腫れ\n- 🟡 要対応：詰め物が取れた、軽い痛み\n- 🟢 予約案内：定期検診、クリーニング希望" }
+    ], updated_at: "2026-01-20" }
+];
+
+var SHIFTS_FEB = {
+  "2026-02-03": [{ staff: "s1", start: "9:00", end: "18:00" }, { staff: "s2", start: "9:00", end: "17:00" }, { staff: "s4", start: "9:00", end: "18:00" }],
+  "2026-02-04": [{ staff: "s1", start: "9:00", end: "18:00" }, { staff: "s3", start: "10:00", end: "19:00" }, { staff: "s4", start: "9:00", end: "18:00" }, { staff: "s6", start: "9:00", end: "17:00" }],
+  "2026-02-05": [{ staff: "s2", start: "9:00", end: "17:00" }, { staff: "s5", start: "9:00", end: "18:00" }, { staff: "s4", start: "9:00", end: "14:00" }],
+  "2026-02-06": [{ staff: "s1", start: "9:00", end: "18:00" }, { staff: "s2", start: "9:00", end: "17:00" }, { staff: "s3", start: "10:00", end: "19:00" }, { staff: "s6", start: "9:00", end: "17:00" }],
+  "2026-02-07": [{ staff: "s1", start: "9:00", end: "13:00" }, { staff: "s5", start: "9:00", end: "18:00" }, { staff: "s4", start: "9:00", end: "18:00" }],
+  "2026-02-10": [{ staff: "s1", start: "9:00", end: "18:00" }, { staff: "s2", start: "9:00", end: "17:00" }, { staff: "s3", start: "10:00", end: "19:00" }, { staff: "s4", start: "9:00", end: "18:00" }, { staff: "s5", start: "9:00", end: "18:00" }],
+  "2026-02-11": [{ staff: "s1", start: "9:00", end: "18:00" }, { staff: "s6", start: "9:00", end: "17:00" }, { staff: "s4", start: "9:00", end: "18:00" }],
+  "2026-02-12": [{ staff: "s2", start: "9:00", end: "17:00" }, { staff: "s5", start: "9:00", end: "18:00" }, { staff: "s3", start: "10:00", end: "19:00" }],
+  "2026-02-13": [{ staff: "s1", start: "9:00", end: "18:00" }, { staff: "s2", start: "9:00", end: "17:00" }, { staff: "s4", start: "9:00", end: "18:00" }, { staff: "s6", start: "9:00", end: "17:00" }],
+  "2026-02-14": [{ staff: "s1", start: "9:00", end: "13:00" }, { staff: "s5", start: "9:00", end: "18:00" }],
+  "2026-02-17": [{ staff: "s1", start: "9:00", end: "18:00" }, { staff: "s2", start: "9:00", end: "17:00" }, { staff: "s3", start: "10:00", end: "19:00" }, { staff: "s4", start: "9:00", end: "18:00" }],
+  "2026-02-18": [{ staff: "s1", start: "9:00", end: "18:00" }, { staff: "s6", start: "9:00", end: "17:00" }, { staff: "s5", start: "9:00", end: "18:00" }],
+  "2026-02-19": [{ staff: "s2", start: "9:00", end: "17:00" }, { staff: "s3", start: "10:00", end: "19:00" }, { staff: "s4", start: "9:00", end: "18:00" }],
+  "2026-02-20": [{ staff: "s1", start: "9:00", end: "18:00" }, { staff: "s2", start: "9:00", end: "17:00" }, { staff: "s6", start: "9:00", end: "17:00" }],
+  "2026-02-21": [{ staff: "s5", start: "9:00", end: "18:00" }, { staff: "s4", start: "9:00", end: "18:00" }]
+};
+
+var THANKYOU = [
+  { id: "t1", from: "s4", to: "s2", message: "急患対応のフォローありがとうございました！おかげでスムーズに案内できました。", emoji: "🙏", created_at: "2026-02-10T16:30:00" },
+  { id: "t2", from: "s2", to: "s1", message: "治療計画の相談に丁寧にのっていただきありがとうございます。勉強になりました！", emoji: "✨", created_at: "2026-02-09T12:00:00" },
+  { id: "t3", from: "s6", to: "s4", message: "シフト交代を快く引き受けてくれてありがとう！助かりました😊", emoji: "💪", created_at: "2026-02-08T18:00:00" },
+  { id: "t4", from: "s3", to: "s1", message: "技工物の納期調整、迅速に対応していただき感謝です。", emoji: "🌟", created_at: "2026-02-07T10:00:00" },
+  { id: "t5", from: "s1", to: "s6", message: "新人研修の資料作成ありがとう。とてもわかりやすかったです。", emoji: "💐", created_at: "2026-02-06T17:00:00" },
+  { id: "t6", from: "s5", to: "s2", message: "SRPの症例でアドバイスありがとう。次回も相談させてください！", emoji: "🤝", created_at: "2026-02-05T15:00:00" }
+];
+
+var PAID_LEAVE = [
+  { id: "s1", total: 20, used: 5, history: [{ date: "2026-01-06", days: 1, reason: "私用" }, { date: "2025-12-29", days: 3, reason: "年末帰省" }, { date: "2025-11-15", days: 1, reason: "通院" }] },
+  { id: "s2", total: 15, used: 3, history: [{ date: "2026-01-20", days: 2, reason: "旅行" }, { date: "2025-10-10", days: 1, reason: "私用" }] },
+  { id: "s3", total: 12, used: 1, history: [{ date: "2025-12-24", days: 1, reason: "私用" }] },
+  { id: "s4", total: 10, used: 2, history: [{ date: "2026-02-03", days: 1, reason: "体調不良" }, { date: "2025-11-22", days: 1, reason: "私用" }] },
+  { id: "s5", total: 15, used: 4, history: [{ date: "2026-01-13", days: 2, reason: "家庭事情" }, { date: "2025-12-02", days: 2, reason: "旅行" }] },
+  { id: "s6", total: 10, used: 0, history: [] }
+];
+
+// --- State ---
+var state = {
+  activeTab: "portal",
+  subTab: "board",
+  portalFilter: "all",
+  invFilter: "all",
+  invSearch: "",
+  manualFilter: "all",
+  manualSearch: "",
+  selectedManual: null,
+  shiftDate: null,
+  shiftMonth: 1, // 0-indexed, Feb = 1
+  shiftYear: 2026,
+  tyTab: "received",
+  staffSearch: "",
+  leaveTab: "list",
+  selectedAnnouncement: null,
+  selectedMeeting: null,
+  selectedHiyari: null,
+  toast: null
+};
+
+function getStaff(id) { return STAFF.find(function(s){ return s.id === id; }) || { name: "不明", avatar: "👤" }; }
+function fmtDate(d) { var dt = new Date(d); return dt.getFullYear() + "/" + (dt.getMonth()+1) + "/" + dt.getDate(); }
+function fmtDateTime(d) { var dt = new Date(d); return (dt.getMonth()+1) + "/" + dt.getDate() + " " + String(dt.getHours()).padStart(2,"0") + ":" + String(dt.getMinutes()).padStart(2,"0"); }
+function showToast(msg) { state.toast = msg; render(); setTimeout(function(){ state.toast = null; render(); }, 2000); }
+
+// --- Render Engine ---
+function render() {
+  var app = document.getElementById("app");
+  var html = "";
+
+  // Demo Banner
+  html += '<div class="demo-banner">🦷 Dental Assistant Pro<span class="demo-badge">DEMO</span></div>';
+
+  // Header
+  html += '<div class="header"><div class="header-left"><span class="logo">🦷</span><span class="name">サンプル歯科クリニック</span></div><div class="header-right"><span class="header-avatar">' + currentUser.avatar + '</span><div class="header-user"><div class="uname">' + currentUser.name + '</div><div class="urole">管理者</div></div></div></div>';
+
+  // Main
+  html += '<div class="main">';
+  
+  if (state.activeTab === "portal") html += renderPortal();
+  else if (state.activeTab === "inventory") html += renderInventory();
+  else if (state.activeTab === "manual") html += renderManual();
+  else if (state.activeTab === "shift") html += renderShift();
+  else if (state.activeTab === "thankyou") html += renderThankYou();
+  else if (state.activeTab === "staff") html += renderStaffManagement();
+  
+  html += '</div>';
+
+  // Toast
+  if (state.toast) html += '<div class="toast">' + state.toast + '</div>';
+
+  // Bottom Nav
+  var tabs = [
+    { id: "portal", icon: "📋", label: "連絡" },
+    { id: "inventory", icon: "📦", label: "在庫" },
+    { id: "manual", icon: "📖", label: "マニュアル" },
+    { id: "shift", icon: "📅", label: "シフト" },
+    { id: "thankyou", icon: "💌", label: "Thanks" },
+    { id: "staff", icon: "👥", label: "スタッフ" }
+  ];
+  html += '<div class="bottom-nav">';
+  for (var i = 0; i < tabs.length; i++) {
+    var t = tabs[i];
+    html += '<div class="nav-item' + (state.activeTab === t.id ? " active" : "") + '" onclick="switchTab(\'' + t.id + '\')"><div class="icon">' + t.icon + '</div><div class="label">' + t.label + '</div></div>';
+  }
+  html += '</div>';
+
+  app.innerHTML = html;
+}
+
+function switchTab(id) { state.activeTab = id; state.selectedAnnouncement = null; state.selectedManual = null; state.selectedMeeting = null; state.selectedHiyari = null; render(); }
+
+// ============================================================
+// PORTAL TAB
+// ============================================================
+function renderPortal() {
+  var h = '';
+  // Sub tabs
+  h += '<div class="sub-tabs">';
+  h += '<div class="sub-tab' + (state.subTab === "board" ? " active" : "") + '" onclick="state.subTab=\'board\';render()">📋 連絡</div>';
+  h += '<div class="sub-tab' + (state.subTab === "meeting" ? " active" : "") + '" onclick="state.subTab=\'meeting\';render()">🤝 会議</div>';
+  h += '<div class="sub-tab' + (state.subTab === "hiyari" ? " active" : "") + '" onclick="state.subTab=\'hiyari\';render()">⚠️ ヒヤリ</div>';
+  h += '</div>';
+
+  if (state.subTab === "board") h += renderBoard();
+  else if (state.subTab === "meeting") h += renderMeetings();
+  else if (state.subTab === "hiyari") h += renderHiyari();
+  return h;
+}
+
+function renderBoard() {
+  var h = '';
+  // Quick Stats
+  var lowStock = INVENTORY.filter(function(i){ return i.stock < i.min_stock; });
+  h += '<div class="stats-grid">';
+  h += '<div class="stat-card" style="background:#fee2e2;border-color:#fecaca"><div class="num" style="color:#dc2626">' + lowStock.length + '</div><div class="lbl" style="color:#dc2626">在庫不足</div></div>';
+  h += '<div class="stat-card" style="background:#e0f2fe;border-color:#bae6fd"><div class="num" style="color:#0284c7">' + ANNOUNCEMENTS.length + '</div><div class="lbl" style="color:#0284c7">連絡事項</div></div>';
+  h += '<div class="stat-card" style="background:#dcfce7;border-color:#bbf7d0"><div class="num" style="color:#16a34a">' + STAFF.length + '</div><div class="lbl" style="color:#16a34a">スタッフ</div></div>';
+  h += '</div>';
+
+  // Filter
+  h += '<div class="pills">';
+  var cats = ["all","お知らせ","業務連絡","緊急"];
+  for (var i = 0; i < cats.length; i++) {
+    var c = cats[i];
+    var label = c === "all" ? "全て" : c;
+    h += '<div class="pill' + (state.portalFilter === c ? " active" : "") + '" onclick="state.portalFilter=\'' + c + '\';render()">' + label + '</div>';
+  }
+  h += '</div>';
+
+  // Detail view
+  if (state.selectedAnnouncement) {
+    var a = state.selectedAnnouncement;
+    var author = getStaff(a.author);
+    h += '<button class="btn btn-outline btn-sm" onclick="state.selectedAnnouncement=null;render()" style="margin-bottom:8px">← 一覧に戻る</button>';
+    h += '<div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+    h += '<span class="priority-dot priority-' + a.priority + '"></span>';
+    h += '<span class="badge badge-' + (a.priority==="high"?"red":a.priority==="normal"?"sky":"slate") + '">' + a.priority + '</span>';
+    if (a.is_pinned) h += '<span class="badge badge-amber">📌 ピン留め</span>';
+    h += '</div>';
+    h += '<div class="card-title" style="font-size:15px;margin-bottom:8px">' + a.title + '</div>';
+    h += '<div class="card-body">' + a.body + '</div>';
+    h += '<div style="margin-top:12px;padding-top:8px;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:6px">';
+    h += '<span style="font-size:14px">' + author.avatar + '</span><span style="font-size:11px;color:#64748b">' + author.name + '</span>';
+    h += '<span style="font-size:10px;color:#94a3b8;margin-left:auto">' + fmtDateTime(a.created_at) + '</span></div>';
+    // Reactions
+    h += '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">';
+    for (var key in a.reactions) {
+      h += '<span style="font-size:11px;background:#f1f5f9;padding:3px 8px;border-radius:99px">' + key + ' ' + a.reactions[key].length + '</span>';
+    }
+    h += '</div>';
+    h += '<div style="margin-top:6px;font-size:10px;color:#94a3b8">👀 既読 ' + a.reads.length + '/' + STAFF.length + '</div>';
+    h += '</div>';
+    return h;
+  }
+
+  // List
+  var sorted = ANNOUNCEMENTS.slice().sort(function(a,b) {
+    if (a.is_pinned !== b.is_pinned) return b.is_pinned ? 1 : -1;
+    var po = { high: 3, normal: 2, low: 1 };
+    if (po[a.priority] !== po[b.priority]) return po[b.priority] - po[a.priority];
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+  for (var i = 0; i < sorted.length; i++) {
+    var a = sorted[i];
+    if (state.portalFilter !== "all" && a.category !== state.portalFilter) continue;
+    var author = getStaff(a.author);
+    h += '<div class="card" onclick="state.selectedAnnouncement=ANNOUNCEMENTS.find(function(x){return x.id===\'' + a.id + '\'});render()" style="cursor:pointer">';
+    h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">';
+    h += '<span class="priority-dot priority-' + a.priority + '"></span>';
+    if (a.is_pinned) h += '<span style="font-size:10px">📌</span>';
+    h += '<span class="badge badge-' + (a.category==="緊急"?"red":"sky") + '">' + a.category + '</span>';
+    h += '<span style="font-size:10px;color:#94a3b8;margin-left:auto">' + fmtDateTime(a.created_at) + '</span>';
+    h += '</div>';
+    h += '<div class="card-title">' + a.title + '</div>';
+    h += '<div class="card-body" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + a.body + '</div>';
+    h += '<div style="display:flex;align-items:center;gap:4px;margin-top:6px">';
+    h += '<span style="font-size:12px">' + author.avatar + '</span><span style="font-size:10px;color:#94a3b8">' + author.name + '</span>';
+    h += '<span style="font-size:10px;color:#94a3b8;margin-left:auto">👀' + a.reads.length + '</span>';
+    for (var key in a.reactions) { h += '<span style="font-size:10px">' + key + a.reactions[key].length + '</span>'; }
+    h += '</div></div>';
+  }
+  return h;
+}
+
+function renderMeetings() {
+  var h = '';
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><h2 style="font-size:16px;font-weight:700">🤝 ミーティング</h2></div>';
+  
+  if (state.selectedMeeting) {
+    var m = state.selectedMeeting;
+    h += '<button class="btn btn-outline btn-sm" onclick="state.selectedMeeting=null;render()" style="margin-bottom:8px">← 一覧に戻る</button>';
+    h += '<div class="card">';
+    h += '<div class="card-title" style="font-size:15px">' + m.title + '</div>';
+    h += '<div style="display:flex;gap:8px;margin:8px 0;flex-wrap:wrap">';
+    h += '<span class="badge badge-sky">📅 ' + m.date + '</span>';
+    h += '<span class="badge badge-purple">🕐 ' + m.time + '</span>';
+    h += '<span class="badge badge-slate">📍 ' + m.location + '</span>';
+    h += '</div>';
+    h += '<div style="font-size:12px;font-weight:700;color:#334155;margin:10px 0 6px">📝 議題</div>';
+    for (var i = 0; i < m.agenda.length; i++) {
+      var ag = m.agenda[i];
+      var tagColor = ag.tag === "報告" ? "sky" : ag.tag === "議論" ? "amber" : ag.tag === "決定" ? "red" : "green";
+      h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9">';
+      h += '<span style="font-size:14px">' + (ag.done ? "✅" : "⬜") + '</span>';
+      h += '<span style="font-size:12px;flex:1">' + ag.text + '</span>';
+      h += '<span class="badge badge-' + tagColor + '">' + ag.tag + '</span>';
+      h += '</div>';
+    }
+    h += '<div style="font-size:12px;font-weight:700;color:#334155;margin:10px 0 6px">👥 参加者</div>';
+    h += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
+    for (var j = 0; j < m.attendees.length; j++) {
+      var s = getStaff(m.attendees[j]);
+      h += '<span style="font-size:11px;background:#f1f5f9;padding:3px 8px;border-radius:99px">' + s.avatar + ' ' + s.name + '</span>';
+    }
+    h += '</div></div>';
+    return h;
+  }
+
+  for (var i = 0; i < MEETINGS.length; i++) {
+    var m = MEETINGS[i];
+    h += '<div class="card" style="cursor:pointer" onclick="state.selectedMeeting=MEETINGS[' + i + '];render()">';
+    h += '<div class="card-title">' + m.title + '</div>';
+    h += '<div style="display:flex;gap:6px;margin-top:4px">';
+    h += '<span class="badge badge-sky">📅 ' + m.date + '</span>';
+    h += '<span class="badge badge-purple">🕐 ' + m.time + '</span>';
+    h += '</div>';
+    h += '<div style="font-size:10px;color:#94a3b8;margin-top:4px">📝 議題 ' + m.agenda.length + '件 ・ 👥 ' + m.attendees.length + '名</div>';
+    h += '</div>';
+  }
+  return h;
+}
+
+function renderHiyari() {
+  var h = '';
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><h2 style="font-size:16px;font-weight:700">⚠️ ヒヤリハット</h2></div>';
+  
+  for (var i = 0; i < HIYARIHATTO.length; i++) {
+    var hi = HIYARIHATTO[i];
+    var sevColor = hi.severity === "高" ? "red" : hi.severity === "中" ? "amber" : "slate";
+    var stColor = hi.status === "対策済" ? "green" : hi.status === "対策中" ? "amber" : "red";
+    h += '<div class="card">';
+    h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">';
+    h += '<span class="badge badge-' + sevColor + '">重要度: ' + hi.severity + '</span>';
+    h += '<span class="badge badge-' + stColor + '">' + hi.status + '</span>';
+    if (hi.anonymous) h += '<span class="badge badge-purple">🔒 匿名</span>';
+    h += '<span style="font-size:10px;color:#94a3b8;margin-left:auto">' + hi.created_at + '</span>';
+    h += '</div>';
+    h += '<div class="card-title">' + hi.title + '</div>';
+    h += '<div class="card-body">' + hi.body + '</div>';
+    if (!hi.anonymous && hi.author) { var au = getStaff(hi.author); h += '<div style="font-size:10px;color:#94a3b8;margin-top:6px">' + au.avatar + ' ' + au.name + '</div>'; }
+    h += '</div>';
+  }
+  return h;
+}
+
+// ============================================================
+// INVENTORY TAB
+// ============================================================
+function renderInventory() {
+  var h = '';
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><h2 style="font-size:16px;font-weight:700">📦 在庫管理</h2></div>';
+
+  // Search
+  h += '<input class="search" placeholder="🔍 在庫を検索..." value="' + state.invSearch + '" oninput="state.invSearch=this.value;render()" style="margin-bottom:8px">';
+
+  // Filter
+  h += '<div class="pills">';
+  var cats = ["all","消耗品","材料","薬品","予防"];
+  for (var i = 0; i < cats.length; i++) {
+    var c = cats[i];
+    var label = c === "all" ? "全て" : c;
+    h += '<div class="pill' + (state.invFilter === c ? " active" : "") + '" onclick="state.invFilter=\'' + c + '\';render()">' + label + '</div>';
+  }
+  h += '</div>';
+
+  // Low stock alert
+  var low = INVENTORY.filter(function(i){ return i.stock < i.min_stock; });
+  if (low.length > 0) {
+    h += '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:10px;margin-bottom:10px">';
+    h += '<div style="font-size:11px;font-weight:700;color:#dc2626;margin-bottom:4px">⚠️ 在庫不足アラート</div>';
+    for (var i = 0; i < low.length; i++) {
+      h += '<div style="font-size:11px;color:#dc2626">• ' + low[i].name + '（残 ' + low[i].stock + ' ' + low[i].unit + ' / 基準 ' + low[i].min_stock + '）</div>';
+    }
+    h += '</div>';
+  }
+
+  // Supplier summary
+  h += '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">';
+  for (var i = 0; i < SUPPLIERS.length; i++) {
+    var sp = SUPPLIERS[i];
+    var cnt = INVENTORY.filter(function(inv){ return inv.supplier === sp.name; }).length;
+    h += '<span class="badge badge-slate" style="cursor:pointer" onclick="showToast(\'' + sp.name + ' TEL:' + sp.tel + '\')">' + sp.name + '(' + cnt + ')</span>';
+  }
+  h += '</div>';
+
+  // Items
+  var filtered = INVENTORY.filter(function(inv) {
+    var matchCat = state.invFilter === "all" || inv.category === state.invFilter;
+    var matchSearch = !state.invSearch || inv.name.toLowerCase().indexOf(state.invSearch.toLowerCase()) >= 0;
+    return matchCat && matchSearch;
+  });
+
+  for (var i = 0; i < filtered.length; i++) {
+    var inv = filtered[i];
+    var isLow = inv.stock < inv.min_stock;
+    h += '<div class="inv-item" style="' + (isLow ? "border-color:#fecaca;background:#fffbeb" : "") + '">';
+    h += '<div class="inv-icon">' + (inv.category === "消耗品" ? "🧤" : inv.category === "材料" ? "🦷" : inv.category === "薬品" ? "💊" : "🛡") + '</div>';
+    h += '<div class="inv-info"><div class="inv-name">' + inv.name + '</div>';
+    h += '<div class="inv-meta">' + inv.category + ' ・ ' + inv.supplier + '</div></div>';
+    h += '<div class="inv-stock"><div class="inv-num" style="color:' + (isLow ? "#dc2626" : "#1e293b") + '">' + inv.stock + '</div>';
+    h += '<div class="inv-unit">' + inv.unit + ' / ' + inv.min_stock + '</div></div>';
+    h += '</div>';
+  }
+  return h;
+}
+
+// ============================================================
+// MANUAL TAB
+// ============================================================
+function renderManual() {
+  var h = '';
+
+  if (state.selectedManual) {
+    var m = state.selectedManual;
+    h += '<button class="btn btn-outline btn-sm" onclick="state.selectedManual=null;render()" style="margin-bottom:8px">← 一覧に戻る</button>';
+    h += '<div class="card">';
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+    h += '<span style="font-size:24px">' + m.icon + '</span>';
+    h += '<div><div class="card-title" style="font-size:15px">' + m.title + '</div>';
+    h += '<div style="display:flex;gap:4px;margin-top:2px"><span class="badge badge-sky">' + m.category + '</span><span style="font-size:10px;color:#94a3b8">更新: ' + m.updated_at + '</span></div></div></div>';
+    if (m.tags) { h += '<div style="margin-bottom:8px">'; for (var j = 0; j < m.tags.length; j++) h += '<span class="tag">#' + m.tags[j] + '</span> '; h += '</div>'; }
+    // Blocks
+    for (var j = 0; j < m.blocks.length; j++) {
+      var b = m.blocks[j];
+      if (b.type === "text") {
+        h += '<div class="block-text">' + renderMd(b.value) + '</div>';
+      } else if (b.type === "image") {
+        h += '<img class="block-img" src="' + b.value + '" alt="' + (b.name||"") + '">';
+      } else if (b.type === "video") {
+        h += '<div style="background:#f3e8ff;border-radius:10px;padding:20px;text-align:center;margin:8px 0;border:1px solid #e2e8f0"><div style="font-size:28px">🎬</div><div style="font-size:11px;color:#7c3aed;margin-top:4px">' + (b.name||"動画") + '</div><div style="font-size:10px;color:#94a3b8">（デモ版では動画再生不可）</div></div>';
+      }
+    }
+    h += '</div>';
+    return h;
+  }
+
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><h2 style="font-size:16px;font-weight:700">📖 マニュアル</h2></div>';
+
+  // Search
+  h += '<input class="search" placeholder="🔍 マニュアルを検索..." value="' + state.manualSearch + '" oninput="state.manualSearch=this.value;render()" style="margin-bottom:8px">';
+
+  // Filter
+  h += '<div class="pills">';
+  var cats = ["all","業務手順","機器操作","緊急対応"];
+  for (var i = 0; i < cats.length; i++) {
+    var c = cats[i];
+    h += '<div class="pill' + (state.manualFilter === c ? " active" : "") + '" onclick="state.manualFilter=\'' + c + '\';render()">' + (c === "all" ? "全て" : c) + '</div>';
+  }
+  h += '</div>';
+
+  var filtered = MANUALS.filter(function(m) {
+    var matchCat = state.manualFilter === "all" || m.category === state.manualFilter;
+    var matchSearch = !state.manualSearch || m.title.toLowerCase().indexOf(state.manualSearch.toLowerCase()) >= 0;
+    return matchCat && matchSearch;
+  });
+
+  for (var i = 0; i < filtered.length; i++) {
+    var m = filtered[i];
+    h += '<div class="card" style="cursor:pointer;display:flex;align-items:center;gap:10px" onclick="state.selectedManual=MANUALS.find(function(x){return x.id===\'' + m.id + '\'});render()">';
+    h += '<span style="font-size:22px;flex-shrink:0">' + m.icon + '</span>';
+    h += '<div style="flex:1;min-width:0"><div class="card-title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + m.title + '</div>';
+    h += '<div style="display:flex;gap:4px;margin-top:2px;flex-wrap:wrap">';
+    h += '<span class="badge badge-sky">' + m.category + '</span>';
+    if (m.job_level && m.job_level !== "all") h += '<span class="badge badge-purple">🔒 ' + m.job_level + '</span>';
+    h += '<span style="font-size:10px;color:#94a3b8">更新: ' + m.updated_at + '</span></div>';
+    if (m.tags) { h += '<div style="margin-top:2px">'; for (var j = 0; j < Math.min(m.tags.length,3); j++) h += '<span class="tag">#' + m.tags[j] + '</span> '; h += '</div>'; }
+    h += '</div><span style="color:#cbd5e1">→</span></div>';
+  }
+  return h;
+}
+
+function renderMd(t) {
+  return t.replace(/^## (.+)$/gm,'<div style="font-size:14px;font-weight:700;color:#1e293b;margin:10px 0 6px">$1</div>')
+    .replace(/^### (.+)$/gm,'<div style="font-size:12px;font-weight:700;color:#334155;margin:8px 0 4px">$1</div>')
+    .replace(/^- (.+)$/gm,'<div style="font-size:12px;color:#475569;padding:2px 0 2px 12px">• $1</div>')
+    .replace(/^\d+\. (.+)$/gm,'<div style="font-size:12px;color:#475569;padding:2px 0 2px 12px">$&</div>')
+    .replace(/\n/g,'<br>');
+}
+
+// ============================================================
+// SHIFT TAB
+// ============================================================
+function renderShift() {
+  var h = '';
+  var year = state.shiftYear;
+  var month = state.shiftMonth;
+  var monthNames = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+  
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  h += '<h2 style="font-size:16px;font-weight:700">📅 シフト管理</h2>';
+  h += '</div>';
+
+  // Month navigation
+  h += '<div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px">';
+  h += '<button class="btn btn-outline btn-sm" onclick="prevMonth()">◀</button>';
+  h += '<span style="font-size:14px;font-weight:700">' + year + '年 ' + monthNames[month] + '</span>';
+  h += '<button class="btn btn-outline btn-sm" onclick="nextMonth()">▶</button>';
+  h += '</div>';
+
+  if (state.shiftDate) {
+    h += renderDayShift(state.shiftDate);
+    return h;
+  }
+
+  // Calendar
+  var firstDay = new Date(year, month, 1).getDay();
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var today = new Date();
+  var todayStr = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,"0") + "-" + String(today.getDate()).padStart(2,"0");
+
+  h += '<div class="cal-grid">';
+  var dayLabels = ["日","月","火","水","木","金","土"];
+  for (var d = 0; d < 7; d++) h += '<div class="cal-header" style="color:' + (d===0?"#dc2626":d===6?"#0284c7":"#64748b") + '">' + dayLabels[d] + '</div>';
+
+  for (var i = 0; i < firstDay; i++) h += '<div class="cal-day empty"></div>';
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var dateStr = year + "-" + String(month+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
+    var shifts = SHIFTS_FEB[dateStr] || [];
+    var isToday = dateStr === todayStr;
+    var cls = "cal-day";
+    if (isToday) cls += " today";
+    else if (shifts.length > 0 && shifts.length < 3) cls += " short";
+    else if (shifts.length >= 3) cls += " has-shift";
+    
+    h += '<div class="' + cls + '" onclick="state.shiftDate=\'' + dateStr + '\';render()" style="cursor:pointer">';
+    h += '<div style="font-size:12px">' + d + '</div>';
+    if (shifts.length > 0) h += '<div style="font-size:8px;color:' + (shifts.length < 3 ? "#d97706" : "#16a34a") + '">' + shifts.length + '名</div>';
+    h += '</div>';
+  }
+  h += '</div>';
+
+  // Legend
+  h += '<div style="display:flex;gap:12px;margin-top:8px;justify-content:center">';
+  h += '<span style="font-size:10px;color:#94a3b8"><span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border:1px solid #bbf7d0;border-radius:3px;margin-right:3px;vertical-align:middle"></span>3名以上</span>';
+  h += '<span style="font-size:10px;color:#94a3b8"><span style="display:inline-block;width:10px;height:10px;background:#fef3c7;border:1px solid #fde68a;border-radius:3px;margin-right:3px;vertical-align:middle"></span>人員不足</span>';
+  h += '</div>';
+
+  return h;
+}
+
+function renderDayShift(dateStr) {
+  var h = '';
+  h += '<button class="btn btn-outline btn-sm" onclick="state.shiftDate=null;render()" style="margin-bottom:8px">← カレンダーに戻る</button>';
+  h += '<div class="card"><div class="card-title" style="margin-bottom:10px">📅 ' + dateStr + ' のシフト</div>';
+
+  var shifts = SHIFTS_FEB[dateStr] || [];
+  if (shifts.length === 0) {
+    h += '<div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px">シフト登録なし</div>';
+  } else {
+    // Timeline header
+    h += '<div style="display:flex;align-items:center;margin-bottom:4px"><div style="width:60px"></div><div style="flex:1;display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;padding:0 2px"><span>9:00</span><span>12:00</span><span>15:00</span><span>18:00</span></div></div>';
+    for (var i = 0; i < shifts.length; i++) {
+      var sh = shifts[i];
+      var s = getStaff(sh.staff);
+      var startH = parseInt(sh.start.split(":")[0]);
+      var endH = parseInt(sh.end.split(":")[0]);
+      var left = ((startH - 9) / 10 * 100);
+      var width = ((endH - startH) / 10 * 100);
+      var colors = ["#0284c7","#16a34a","#7c3aed","#d97706","#dc2626","#db2777"];
+      h += '<div class="shift-row"><div class="shift-name">' + s.avatar + ' ' + s.name.split(" ")[1] + '</div>';
+      h += '<div class="shift-bar-wrap"><div class="shift-bar" style="left:' + left + '%;width:' + width + '%;background:' + colors[i%6] + '">' + sh.start + '-' + sh.end + '</div></div></div>';
+    }
+  }
+  h += '<div style="margin-top:8px;font-size:11px;color:#64748b">出勤: <strong>' + shifts.length + '名</strong></div>';
+  if (shifts.length < 3) h += '<div style="font-size:11px;color:#d97706;margin-top:2px">⚠️ 人員不足の可能性があります</div>';
+  h += '</div>';
+  return h;
+}
+
+function prevMonth() { state.shiftMonth--; if(state.shiftMonth < 0){state.shiftMonth=11;state.shiftYear--;} state.shiftDate=null; render(); }
+function nextMonth() { state.shiftMonth++; if(state.shiftMonth > 11){state.shiftMonth=0;state.shiftYear++;} state.shiftDate=null; render(); }
+
+// ============================================================
+// THANK YOU TAB
+// ============================================================
+function renderThankYou() {
+  var h = '';
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><h2 style="font-size:16px;font-weight:700">💌 ありがとうカード</h2></div>';
+
+  // Sub tabs
+  h += '<div class="sub-tabs">';
+  h += '<div class="sub-tab' + (state.tyTab === "received" ? " active" : "") + '" onclick="state.tyTab=\'received\';render()">📥 もらった</div>';
+  h += '<div class="sub-tab' + (state.tyTab === "sent" ? " active" : "") + '" onclick="state.tyTab=\'sent\';render()">📤 送った</div>';
+  h += '<div class="sub-tab' + (state.tyTab === "ranking" ? " active" : "") + '" onclick="state.tyTab=\'ranking\';render()">👑 ランキング</div>';
+  h += '</div>';
+
+  if (state.tyTab === "ranking") {
+    // Count received
+    var counts = {};
+    for (var i = 0; i < THANKYOU.length; i++) {
+      var c = THANKYOU[i].to;
+      counts[c] = (counts[c] || 0) + 1;
+    }
+    var sorted = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; });
+    var medals = ["🥇","🥈","🥉"];
+    for (var i = 0; i < sorted.length; i++) {
+      var s = getStaff(sorted[i]);
+      h += '<div class="rank-item"><div class="rank-medal">' + (medals[i]||"") + '</div>';
+      h += '<span style="font-size:16px">' + s.avatar + '</span>';
+      h += '<div class="rank-name">' + s.name + '</div>';
+      h += '<div class="rank-count">' + counts[sorted[i]] + ' 枚</div></div>';
+    }
+    // Send stats
+    h += '<div style="margin-top:12px;font-size:12px;font-weight:700;color:#334155;margin-bottom:6px">📊 送信状況</div>';
+    for (var i = 0; i < STAFF.length; i++) {
+      var s = STAFF[i];
+      var sent = THANKYOU.filter(function(t){ return t.from === s.id; }).length;
+      var pct = Math.min(sent / 10 * 100, 100);
+      h += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0"><span style="font-size:12px;width:20px">' + s.avatar + '</span>';
+      h += '<span style="font-size:11px;width:70px;flex-shrink:0">' + s.name.split(" ")[1] + '</span>';
+      h += '<div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:' + pct + '%;background:#0284c7"></div></div>';
+      h += '<span style="font-size:10px;color:#64748b;width:35px;text-align:right">' + sent + '/10</span></div>';
+    }
+    return h;
+  }
+
+  var cards = THANKYOU.filter(function(t) {
+    if (state.tyTab === "received") return t.to === currentUser.id;
+    return t.from === currentUser.id;
+  });
+
+  if (cards.length === 0) {
+    h += '<div style="text-align:center;padding:30px;color:#94a3b8"><div style="font-size:36px;margin-bottom:8px">💌</div><div style="font-size:12px">カードはまだありません</div></div>';
+    return h;
+  }
+
+  for (var i = 0; i < cards.length; i++) {
+    var c = cards[i];
+    var from = getStaff(c.from);
+    var to = getStaff(c.to);
+    h += '<div class="ty-card">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between"><span class="ty-emoji">' + c.emoji + '</span>';
+    h += '<span style="font-size:10px;color:#94a3b8">' + fmtDateTime(c.created_at) + '</span></div>';
+    h += '<div class="ty-msg">' + c.message + '</div>';
+    h += '<div class="ty-from">' + (state.tyTab === "received" ? "From: " + from.avatar + " " + from.name : "To: " + to.avatar + " " + to.name) + '</div>';
+    h += '</div>';
+  }
+  return h;
+}
+
+// ============================================================
+// STAFF MANAGEMENT TAB
+// ============================================================
+function renderStaffManagement() {
+  var h = '';
+
+  // Sub tabs
+  h += '<div class="sub-tabs">';
+  h += '<div class="sub-tab' + (state.leaveTab === "list" ? " active" : "") + '" onclick="state.leaveTab=\'list\';render()">👥 スタッフ</div>';
+  h += '<div class="sub-tab' + (state.leaveTab === "leave" ? " active" : "") + '" onclick="state.leaveTab=\'leave\';render()">🏖 有給管理</div>';
+  h += '</div>';
+
+  if (state.leaveTab === "leave") return h + renderPaidLeave();
+
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><h2 style="font-size:16px;font-weight:700">👥 スタッフ一覧</h2></div>';
+
+  for (var i = 0; i < STAFF.length; i++) {
+    var s = STAFF[i];
+    var leave = PAID_LEAVE.find(function(l){ return l.id === s.id; }) || { total: 0, used: 0 };
+    h += '<div class="card" style="display:flex;align-items:center;gap:10px">';
+    h += '<span style="font-size:28px">' + s.avatar + '</span>';
+    h += '<div style="flex:1"><div style="font-size:13px;font-weight:700">' + s.name + '</div>';
+    h += '<div style="display:flex;gap:4px;margin-top:2px">';
+    h += '<span class="badge badge-sky">' + s.job + '</span>';
+    h += '<span class="badge ' + (s.role === "admin" ? "badge-purple" : "badge-slate") + '">' + (s.role === "admin" ? "管理者" : "スタッフ") + '</span>';
+    h += '</div>';
+    h += '<div style="font-size:10px;color:#94a3b8;margin-top:2px">入職: ' + s.joined + ' ・ 有給残: ' + (leave.total - leave.used) + '日</div>';
+    h += '</div></div>';
+  }
+  return h;
+}
+
+function renderPaidLeave() {
+  var h = '';
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><h2 style="font-size:16px;font-weight:700">🏖 有給管理</h2></div>';
+
+  for (var i = 0; i < STAFF.length; i++) {
+    var s = STAFF[i];
+    var leave = PAID_LEAVE.find(function(l){ return l.id === s.id; }) || { total: 0, used: 0, history: [] };
+    var remaining = leave.total - leave.used;
+    var pct = leave.total > 0 ? (remaining / leave.total * 100) : 0;
+    var color = pct > 50 ? "#16a34a" : pct > 20 ? "#d97706" : "#dc2626";
+
+    h += '<div class="card">';
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
+    h += '<span style="font-size:18px">' + s.avatar + '</span>';
+    h += '<span style="font-size:12px;font-weight:700;flex:1">' + s.name + '</span>';
+    h += '<span style="font-size:14px;font-weight:700;color:' + color + '">' + remaining + '日</span>';
+    h += '<span style="font-size:10px;color:#94a3b8">/ ' + leave.total + '日</span>';
+    h += '</div>';
+    h += '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:' + color + '"></div></div>';
+    if (leave.history.length > 0) {
+      h += '<div style="margin-top:6px">';
+      for (var j = 0; j < Math.min(leave.history.length, 2); j++) {
+        var hist = leave.history[j];
+        h += '<div style="font-size:10px;color:#94a3b8;padding:1px 0">📅 ' + hist.date + ' (' + hist.days + '日) - ' + hist.reason + '</div>';
+      }
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+  return h;
+}
+
+// --- Initial Render ---
+render();
+</script>
+</body>
+</html>
